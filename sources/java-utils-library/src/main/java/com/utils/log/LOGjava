@@ -1,0 +1,309 @@
+package com.utils.log;
+
+import ua.edu.file.MyFiler;
+import com.utils.date.Dater;
+import com.utils.files.AddInFile;
+import com.utils.encoding.ConvertChar;
+
+import java.io.*;
+
+
+public class LOG {
+
+	private Dater date;
+	private static AddInFile inFile=AddInFile.getInstance();
+	public static String nameLog;
+    private static File f;
+    private BufferedWriter br = null;
+    public Dater getDate() {
+        return date;
+    }
+    static LOG log=new LOG();
+    public LOG(){
+		date = new Dater();
+		inFile = new AddInFile();
+	}
+    public static LOG getInstance(){
+        return log;
+    }
+    public synchronized Boolean opensFile(String name) { //BufferedWriter
+        this.nameLog=name+"_"+date.getDD_MM_YYYY()+".txt";
+        ////this.nameLog=getDD_MM_YYYY()+"_"+name+".txt";
+        if(inFile.openFile(nameLog)){
+            f=new File(nameLog);
+            if(f.getParentFile()!=null && !f.getParentFile().exists()){
+                f.getParentFile().mkdir();
+            }
+            try {
+                FileWriter fw = new FileWriter(f, true);
+                br = new BufferedWriter(fw);
+            }catch(Exception ex){ex.printStackTrace();}
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isOpened(){
+        return getLogFile()!=null;
+    }
+    public synchronized BufferedWriter openFile(String name) {
+        name=name+"_"+getDD_MM_YYYY()+".txt";
+        try
+        {
+            f = new File(name);
+            if(f.getParentFile()!=null && !f.getParentFile().exists()){
+                f.getParentFile().mkdir();
+            }
+            FileWriter fw = new FileWriter(f, true);
+            br = new BufferedWriter(fw);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return br;
+    }
+
+    public synchronized BufferedWriter openFile(String name, java.util.Date date) {
+        name=name+"_"+getDD_MM_YYYY()+".txt";
+        try {
+            f = new File(name);
+            FileWriter fw = new FileWriter(f, true);
+            br = new BufferedWriter(fw);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return br;
+    }
+    /**
+     *
+     * @return current day_month_year
+     */
+    public String getDD_MM_YYYY() {
+        return getCurrentDay()+"_"+(getCurrentMonth()+1)+"_"+getCurrentYear()+"";
+    }
+    public String getDD_MM_YYYY(java.util.Date date ) {
+        return getDay(date)+"_"+(getMonth(date)+1)+"_"+getYear(date)+"";
+    }
+    private int getCurrentYear() {
+        java.util.Calendar calendar = java.util.Calendar.getInstance(
+                java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
+        calendar.setTime(new java.util.Date());
+        return calendar.get(java.util.Calendar.YEAR);
+    }
+    private int getYear(java.util.Date date) {
+        java.util.Calendar calendar = java.util.Calendar.getInstance(
+                java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
+        calendar.setTime(date);
+        return calendar.get(java.util.Calendar.YEAR);
+    }
+
+    private int getCurrentMonth() {
+        java.util.Calendar calendar = java.util.Calendar.getInstance(
+                java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
+        calendar.setTime(new java.util.Date());
+        return calendar.get(java.util.Calendar.MONTH);
+    }
+    private int getMonth(java.util.Date date) {
+        java.util.Calendar calendar = java.util.Calendar.getInstance(
+                java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
+        calendar.setTime(date);
+        return calendar.get(java.util.Calendar.MONTH);
+    }
+
+    private int getCurrentDay() {
+        java.util.Calendar calendar = java.util.Calendar.getInstance(
+                java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
+        calendar.setTime(new java.util.Date());
+        return calendar.get(java.util.Calendar.DAY_OF_MONTH);
+    }
+    private int getDay(java.util.Date date) {
+        java.util.Calendar calendar = java.util.Calendar.getInstance(
+                java.util.TimeZone.getDefault(), java.util.Locale.getDefault());
+        calendar.setTime(date);
+        return calendar.get(java.util.Calendar.DAY_OF_MONTH);
+    }
+
+    public void createFile(String name){
+        f=new File(name);
+       try {
+           if(!f.exists())//file.createNewFile();
+               MyFiler.createFile(name);
+       }catch (Exception ex){ex.printStackTrace();}
+
+
+    }
+    public String getNameLog(){
+        return f.getName();
+    }
+
+
+    public AddInFile getInFile() {
+        return inFile;
+    }
+
+    public File getLogFile(){
+       f=new File(nameLog);
+       return f!=null && f.exists()?f:null;
+    }
+    public File getLogFile(String nameLog){
+        f=new File(nameLog);
+        return f!=null && f.exists()?f:null;
+    }
+
+    /**
+	 * 
+	 * @param str data to write in file. Data will be written in following format: Wed Jul 17 09:29:07 EEST 2013 + " : "+str
+	 * @return true if everything OK
+	 */
+	public synchronized boolean writeInFile (String str) {
+		str = date.getFullDate() + " : "+str;
+		if(inFile.writeInFile(str)){
+			return true;
+		}
+        inFile.print(str);
+		return false;
+	}
+    public synchronized String readFromFile(){
+      BufferedReader bufferedReader=null;
+      StringBuffer result=new StringBuffer("");
+      String lastStr="";
+      if(f.exists()){
+        try {
+            FileReader fileReader=new FileReader(f);
+            bufferedReader=new BufferedReader(fileReader);
+
+            while((lastStr=new String(bufferedReader.readLine()))!=null){
+              lastStr=new ConvertChar("UTF-8").convertFrom(lastStr);
+              result.append(lastStr);
+            }
+        }catch (FileNotFoundException ex){
+            System.out.println(ex.getMessage());
+        }catch (IOException exx){
+            System.out.println(exx.getMessage());
+        }
+        finally {
+            try {
+                if (bufferedReader != null)bufferedReader.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+       return result.toString();
+      }
+     return result.toString();
+    }
+    public String getFullDate() {
+        return java.util.Calendar.getInstance().getTime()+"";
+    }
+
+    public synchronized void writeInTodayFile (String str) {
+        inFile.print(str);
+    }
+
+	/**
+	 * write empty line without current date
+	 * @return
+	 */
+	public synchronized boolean writeEmptyLine () {
+		if(inFile.writeEmptyLine("\n")){
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * You guess is right! Here we close file)))
+	 */
+	public boolean closeFile() {
+		if(inFile.closeFile("________________________________\n")) {
+			return true;
+		}
+		return false;
+	}
+    public synchronized String readLastStrFromFile(){
+        StringBuffer result=new StringBuffer("");
+        BufferedReader bufferedReader=null;
+        String lastStr="";
+        if(f.exists()){
+            System.out.print("f.exists()");
+            try {
+                FileReader fileReader=new FileReader(f);
+                System.out.println("f "+f.getAbsolutePath());
+                bufferedReader=new BufferedReader(fileReader);
+                System.out.println("bufferedReader"+bufferedReader);
+                if(bufferedReader==null)return result.toString();
+                while((lastStr=bufferedReader.readLine())!=null){
+                    System.out.print("1last str"+lastStr);
+                    //lastStr=new ConvertChar("UTF-8").convertFrom(lastStr);
+                    System.out.print("last str"+lastStr);
+                    result=new StringBuffer(lastStr);
+                }
+            }catch (FileNotFoundException ex){
+                System.out.println(ex.getMessage());
+            }catch (IOException exx){
+                System.out.println(exx.getMessage());
+            }
+            finally {
+                try {
+                    if (bufferedReader != null)bufferedReader.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return result.toString();
+        }
+        System.out.print("!f.exists()");
+        return result.toString();
+    }
+    public synchronized String readLastStrIncasFromFile(){
+        String[]str=readStrFromFile();
+        int i=0;
+        for(;i<1000;i++){
+            if(str[i]==null)break;
+        }
+        while(i!=0 && str[--i].indexOf("incas")==-1){}
+        return str[i];
+    }
+    public synchronized String[] readStrFromFile(){
+        String[]str=new String[1000];
+        //StringBuffer result=new StringBuffer("");
+        BufferedReader bufferedReader=null;
+        String lastStr="";
+        if(f.exists()){
+            System.out.print("f.exists()");
+            try {
+                FileReader fileReader=new FileReader(f);
+                System.out.println("f "+f.getAbsolutePath());
+                bufferedReader=new BufferedReader(fileReader);
+                System.out.println("bufferedReader"+bufferedReader);
+                if(bufferedReader==null)return null;
+                int i=0;
+                while((lastStr=bufferedReader.readLine())!=null){
+                    System.out.print("1last str"+lastStr);
+                    //lastStr=new ConvertChar("UTF-8").convertFrom(lastStr);
+                    System.out.print("last str"+lastStr);
+                    //result=new StringBuffer(lastStr);
+                    str[i]=lastStr;i++;
+                }
+                str[i]=null;
+            }catch (FileNotFoundException ex){
+                System.out.println(ex.getMessage());
+            }catch (IOException exx){
+                System.out.println(exx.getMessage());
+            }
+            finally {
+                try {
+                    if (bufferedReader != null)bufferedReader.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return str;
+        }
+        System.out.print("!f.exists()");
+        return str;
+    }
+
+
+
+}

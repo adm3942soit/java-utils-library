@@ -1,0 +1,110 @@
+package com.utils.files;
+
+import ua.edu.file.MyFiler;
+import com.utils.date.Dater;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+
+public class AddInFile {
+
+	private static BufferedWriter br;
+    private static File f;
+    static AddInFile  add=new AddInFile();
+    public AddInFile(){
+
+    }
+    public static AddInFile getInstance(){
+        return  add;
+
+    }
+	/**
+	 * 
+	 * @param name name = DEVICE_day_month_year.txt
+	 * @return BufferedWriter
+	 */
+	public boolean openFile(String name) {
+		try {
+			f = new File(MyFiler.getCurrentDirectory()+File.separator+name);
+            if(!f.exists()){
+                MyFiler.createFile(f.getAbsolutePath());}
+			FileWriter fw = new FileWriter(f, true);
+			br = new BufferedWriter(fw);
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param str data to write in file. Data will be written in following format: Wed Jul 17 09:29:07 EEST 2013 + " : "+str
+	 * @return true if everything OK
+	 */
+	public boolean writeInFile (String str) {
+		try {
+            if(br==null){System.out.print("!!!br==null");
+                                      return false;}
+
+			br.write(str + "\n");
+            System.out.println(str);
+            br.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
+    public void print(String message) {
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(f, true));
+            writer.write(Dater.getTime() + " : " + message);
+            writer.newLine();
+            writer.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public File getFile() {
+       if(f==null || !f.exists())System.out.println("file log not exist!");
+        return f;
+    }
+
+    /**
+	 * write empty line without current date
+	 * @return
+	 */
+	public boolean writeEmptyLine (String str) {
+		try {
+            if(br==null)return false;
+			br.write(str);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * You guess is right! Here we close file)))
+	 */
+	public boolean closeFile(String str) {
+		if (br != null) {
+			try {
+				writeInFile(str);
+				br.close();
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+}
