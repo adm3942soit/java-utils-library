@@ -87,8 +87,26 @@ public class Stringer {
       if(countS==count)return s2;
    return result;
    }
-   public static void main(String[]args){
+
+    public static String trim(String sourceStr, String symbStr){
+        if(sourceStr==null || sourceStr.isEmpty())return "";
+        if(symbStr==null || symbStr.isEmpty())return sourceStr.trim();
+        int lenSymbStr = symbStr.length();
+        String resultStr = "";
+
+        if(sourceStr.startsWith(symbStr)){
+            resultStr = sourceStr.substring( lenSymbStr );
+        }else resultStr = sourceStr;
+
+        if(resultStr.endsWith(symbStr)){
+            resultStr = resultStr.substring(0, resultStr.length()-lenSymbStr);
+        }
+        return resultStr;
+    }
+
+    public static void main(String[]args){
       //System.out.println(new Stringer().trunkLeaderZero("00000012345455"));
        System.out.println(isNumber("+-="));
    }
+
 }

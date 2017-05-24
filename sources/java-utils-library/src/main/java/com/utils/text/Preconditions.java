@@ -45,5 +45,10 @@ public class Preconditions {
             throw new Exception("Forbidden");
         }
     }
+    public static void checkNotNullNotEmpty(Object[] states)throws Exception{
+        if(states==null || states.length==0){
+            throw new Exception("Illegal argument");
+        }
+    }
 
 }
